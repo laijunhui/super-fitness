@@ -1,0 +1,57 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+migrate_working_dir/
+
+# Logs
+logs/
+*.log
+log/
+
+# Flutter build outputs
+build/
+*.apk
+*.aab
+app-release.apk
+*.keystore
+*.jks
+
+# Android Studio/Gradle
+android/app/debug/
+android/app/profile/
+android/app/release/
+android/.gradle/
+android/build/
+android/captures/
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Podfile.lock
+
+# macOS
+macos/Runner.xcworkspace/
+
+# Linux
+linux/build/
+linux/flutter/
+
+# Windows
+windows/build/
+windows/flutter/
+
+# VS Code
+.vscode/
+
+# IntelliJ
+*.iml
+*.ipr
+*.iws
+.idea/

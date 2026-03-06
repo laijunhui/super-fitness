@@ -1,0 +1,1 @@
+ /Users/dingmaomao/Workplace/super-fitness/.dart_tool/flutter_build/6e858e45860a7e952116e6b7f307a4a6/native_assets.yaml: 
