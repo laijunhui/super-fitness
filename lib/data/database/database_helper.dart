@@ -72,6 +72,12 @@ class DatabaseHelper {
     if (oldVersion < 2) {
       await db.execute('ALTER TABLE ${DbConstants.bodyMetricsTable} ADD COLUMN chest REAL');
     }
+    // 版本2 -> 版本3：添加室内运动相关字段
+    if (oldVersion < 3) {
+      await db.execute('ALTER TABLE ${DbConstants.exercisesTable} ADD COLUMN indoor_sub_type TEXT');
+      await db.execute('ALTER TABLE ${DbConstants.exercisesTable} ADD COLUMN video_title TEXT');
+      await db.execute('ALTER TABLE ${DbConstants.exercisesTable} ADD COLUMN video_url TEXT');
+    }
   }
 
   /// 关闭数据库

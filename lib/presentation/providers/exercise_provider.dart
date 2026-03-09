@@ -96,6 +96,11 @@ class ExerciseProvider extends ChangeNotifier {
     required double calories,
     List<GPSPoint>? gpsPoints,
     String? notes,
+    // 新增：室内运动子类型
+    IndoorExerciseSubType? indoorSubType,
+    // 新增：视频相关信息
+    String? videoTitle,
+    String? videoUrl,
   }) async {
     final exercise = ExerciseModel(
       id: _uuid.v4(),
@@ -106,6 +111,9 @@ class ExerciseProvider extends ChangeNotifier {
       gpsPoints: gpsPoints,
       createdAt: DateTime.now(),
       notes: notes,
+      indoorSubType: indoorSubType,
+      videoTitle: videoTitle,
+      videoUrl: videoUrl,
     );
 
     try {
@@ -116,6 +124,28 @@ class ExerciseProvider extends ChangeNotifier {
       _error = e.toString();
       notifyListeners();
     }
+  }
+
+  /// 添加室内运动记录（跟随视频）
+  Future<void> addIndoorExercise({
+    required IndoorExerciseSubType subType,
+    required int duration,
+    double distance = 0,
+    double calories = 0,
+    String? videoTitle,
+    String? videoUrl,
+    String? notes,
+  }) async {
+    await addExercise(
+      type: ExerciseType.gym,
+      distance: distance,
+      duration: duration,
+      calories: calories,
+      notes: notes,
+      indoorSubType: subType,
+      videoTitle: videoTitle,
+      videoUrl: videoUrl,
+    );
   }
 
   /// 删除运动记录

@@ -22,7 +22,9 @@ class _BottomNavBar extends StatelessWidget {
 
   int _calculateSelectedIndex(BuildContext context) {
     final location = GoRouterState.of(context).uri.toString();
-    if (location.startsWith('/exercise')) return 1;
+    // 首页/运动 都是Tab 0
+    if (location == '/' || location.startsWith('/exercise')) return 0;
+    if (location.startsWith('/tutorials')) return 1;
     if (location.startsWith('/body')) return 2;
     if (location.startsWith('/settings')) return 3;
     return 0;
@@ -34,7 +36,7 @@ class _BottomNavBar extends StatelessWidget {
         context.go('/');
         break;
       case 1:
-        context.go('/exercise');
+        context.go('/tutorials');
         break;
       case 2:
         context.go('/body');
@@ -69,14 +71,14 @@ class _BottomNavBar extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _NavItem(
-                icon: Icons.home_rounded,
-                label: '首页',
+                icon: Icons.directions_run_rounded,
+                label: '运动',
                 isSelected: selectedIndex == 0,
                 onTap: () => _onItemTapped(context, 0),
               ),
               _NavItem(
-                icon: Icons.directions_run_rounded,
-                label: '运动',
+                icon: Icons.play_circle_outline_rounded,
+                label: '教程',
                 isSelected: selectedIndex == 1,
                 onTap: () => _onItemTapped(context, 1),
               ),

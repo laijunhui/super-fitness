@@ -46,7 +46,7 @@ extension ExerciseTypeExtension on ExerciseType {
       case ExerciseType.walking:
         return '健走';
       case ExerciseType.gym:
-        return '健身';
+        return '室内运动';
     }
   }
 

@@ -6,7 +6,7 @@ class DbConstants {
   static const String databaseName = 'super_fitness.db';
 
   /// 数据库版本
-  static const int databaseVersion = 2;
+  static const int databaseVersion = 3;
 
   /// 运动记录表名
   static const String exercisesTable = 'exercises';

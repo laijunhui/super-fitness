@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
-import '../presentation/screens/home/home_screen.dart';
-import '../presentation/screens/exercise/exercise_list_screen.dart';
+import '../core/constants/app_constants.dart';
+import '../data/models/exercise_model.dart';
+import '../presentation/screens/exercise/exercise_home_screen.dart';
 import '../presentation/screens/exercise/exercise_detail_screen.dart';
 import '../presentation/screens/exercise/add_exercise_screen.dart';
 import '../presentation/screens/exercise/active_workout_screen.dart';
@@ -10,21 +11,22 @@ import '../presentation/screens/body/body_input_screen.dart';
 import '../presentation/screens/settings/settings_screen.dart';
 import '../presentation/screens/settings/goals_screen.dart';
 import '../presentation/screens/settings/achievements_screen.dart';
-import '../core/constants/app_constants.dart';
+import '../presentation/screens/tutorials/tutorials_screen.dart';
+import '../presentation/screens/tutorials/video_player_screen.dart';
 
 /// 应用路由配置
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
   routes: [
-    // 首页（统计）
+    // 运动首页（整合版）
     GoRoute(
       path: '/',
-      builder: (context, state) => const HomeScreen(),
+      builder: (context, state) => const ExerciseHomeScreen(),
     ),
     // 运动记录列表
     GoRoute(
       path: '/exercise',
-      builder: (context, state) => const ExerciseListScreen(),
+      builder: (context, state) => const ExerciseHomeScreen(),
     ),
     // 运动详情
     GoRoute(
@@ -38,8 +40,27 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/exercise/add',
       builder: (context, state) {
-        final type = state.extra as ExerciseType?;
-        return AddExerciseScreen(initialType: type);
+        final extra = state.extra;
+        ExerciseType? type;
+        IndoorExerciseSubType? indoorSubType;
+
+        if (extra is ExerciseType) {
+          type = extra;
+        } else if (extra is Map<String, dynamic>) {
+          final typeVal = extra['type'];
+          final indoorSubTypeVal = extra['indoorSubType'];
+          if (typeVal is ExerciseType) {
+            type = typeVal;
+          }
+          if (indoorSubTypeVal is IndoorExerciseSubType) {
+            indoorSubType = indoorSubTypeVal;
+          }
+        }
+
+        return AddExerciseScreen(
+          initialType: type,
+          initialIndoorSubType: indoorSubType,
+        );
       },
     ),
     // 实时运动追踪
@@ -79,6 +100,19 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/achievements',
       builder: (context, state) => const AchievementsScreen(),
+    ),
+    // 教程列表
+    GoRoute(
+      path: '/tutorials',
+      builder: (context, state) => const TutorialsScreen(),
+    ),
+    // 视频播放
+    GoRoute(
+      path: '/tutorials/:id',
+      builder: (context, state) {
+        final id = state.pathParameters['id']!;
+        return VideoPlayerScreen(videoId: id);
+      },
     ),
   ],
 );
