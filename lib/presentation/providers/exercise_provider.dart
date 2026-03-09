@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:uuid/uuid.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/utils/calorie_utils.dart';
@@ -24,7 +23,6 @@ class ExerciseProvider extends ChangeNotifier {
   DateTime? _trackingStartTime;
   ExerciseType? _trackingType;
   double _currentWeight = 70; // 默认体重
-  StreamSubscription<Position>? _positionSubscription;
   bool _gpsEnabled = false;
   String? _gpsError;
 
@@ -139,109 +137,26 @@ class ExerciseProvider extends ChangeNotifier {
 
   // ==================== 实时运动追踪 ====================
 
-  /// 检查是否在模拟器中
-  bool get _isEmulator {
-    // 简单的模拟器检测
-    return !_isRealDevice;
-  }
-
-  bool get _isRealDevice {
-    // 在真实设备上返回true，在模拟器上可能需要特殊检测
-    // 这里简单返回true，让模拟器也能尝试获取位置
+  /// 检查GPS/定位权限
+  /// 高德定位权限由地图组件处理，这里简单返回true
+  Future<bool> checkGpsPermission() async {
+    _gpsEnabled = true;
+    _gpsError = null;
+    notifyListeners();
     return true;
   }
 
-  /// 检查GPS权限
-  Future<bool> checkGpsPermission() async {
-    _gpsError = null;
-
-    try {
-      // 检查定位服务是否开启
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        _gpsError = '请在模拟器中设置GPS位置（三个点 > Location）';
-        _gpsEnabled = false;
-        notifyListeners();
-        return false;
-      }
-
-      // 检查权限
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          _gpsError = '定位权限被拒绝';
-          _gpsEnabled = false;
-          notifyListeners();
-          return false;
-        }
-      }
-
-      if (permission == LocationPermission.deniedForever) {
-        _gpsError = '定位权限被永久拒绝，请在设置中开启';
-        _gpsEnabled = false;
-        notifyListeners();
-        return false;
-      }
-
-      _gpsEnabled = true;
-      _gpsError = null;
-      notifyListeners();
-      return true;
-    } catch (e) {
-      _gpsError = 'GPS初始化失败: $e';
-      _gpsEnabled = false;
-      notifyListeners();
-      return false;
-    }
-  }
-
-  /// 开始GPS追踪
+  /// 开始运动追踪（由ActiveWorkoutScreen通过高德定位回调添加轨迹点）
   void startTracking(ExerciseType type) {
     _isTracking = true;
     _trackingType = type;
     _trackingStartTime = DateTime.now();
     _trackingPoints = [];
-
-    // 启动GPS位置更新
-    _startLocationStream();
+    _gpsEnabled = true;
     notifyListeners();
   }
 
-  /// 启动GPS位置更新流
-  void _startLocationStream() {
-    // 停止之前的订阅
-    _positionSubscription?.cancel();
-
-    // 设置位置精度和更新间隔
-    const locationSettings = LocationSettings(
-      accuracy: LocationAccuracy.high,
-      distanceFilter: 5, // 每移动5米更新一次
-    );
-
-    // 监听位置更新
-    _positionSubscription = Geolocator.getPositionStream(
-      locationSettings: locationSettings,
-    ).listen(
-      (Position position) {
-        if (_isTracking) {
-          final point = GPSPoint(
-            latitude: position.latitude,
-            longitude: position.longitude,
-            timestamp: position.timestamp,
-          );
-          _trackingPoints.add(point);
-          notifyListeners();
-        }
-      },
-      onError: (error) {
-        _gpsError = 'GPS定位错误: $error';
-        notifyListeners();
-      },
-    );
-  }
-
-  /// 添加GPS点
+  /// 添加GPS点（从高德定位回调添加）
   void addTrackingPoint(GPSPoint point) {
     if (_isTracking) {
       _trackingPoints.add(point);
@@ -281,8 +196,6 @@ class ExerciseProvider extends ChangeNotifier {
     _trackingType = null;
     _trackingStartTime = null;
     _trackingPoints = [];
-    _positionSubscription?.cancel();
-    _positionSubscription = null;
 
     return exercise;
   }
@@ -293,14 +206,6 @@ class ExerciseProvider extends ChangeNotifier {
     _trackingType = null;
     _trackingStartTime = null;
     _trackingPoints = [];
-    _positionSubscription?.cancel();
-    _positionSubscription = null;
     notifyListeners();
-  }
-
-  @override
-  void dispose() {
-    _positionSubscription?.cancel();
-    super.dispose();
   }
 }

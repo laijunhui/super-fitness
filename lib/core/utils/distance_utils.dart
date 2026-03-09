@@ -1,5 +1,5 @@
 import 'dart:math' as math;
-import 'package:latlong2/latlong.dart';
+import 'package:amap_flutter_base/amap_flutter_base.dart';
 
 /// GPS距离计算工具
 class DistanceUtils {

@@ -50,6 +50,9 @@
 	<string>需要获取位置信息以记录运动轨迹</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>需要获取位置信息以记录运动轨迹</string>
+	<!-- AMap API Key -->
+	<key>AMapKey</key>
+	<string>b5f5ab10966cbf714bfd05ebac9e3816</string>
 	<!-- Motion Permission -->
 	<key>NSMotionUsageDescription</key>
 	<string>需要访问运动数据以记录健身活动</string>

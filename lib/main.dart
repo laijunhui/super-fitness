@@ -13,6 +13,8 @@ import 'presentation/screens/statistics/statistics_screen.dart';
 import 'presentation/screens/body/body_metrics_screen.dart';
 import 'presentation/screens/body/body_input_screen.dart';
 import 'presentation/screens/settings/settings_screen.dart';
+import 'presentation/screens/settings/goals_screen.dart';
+import 'presentation/screens/settings/achievements_screen.dart';
 import 'core/constants/app_constants.dart';
 import 'package:go_router/go_router.dart';
 
@@ -108,6 +110,14 @@ GoRouter appRouterWithShell(bool isDarkMode) {
       GoRoute(
         path: '/body/input',
         builder: (context, state) => const BodyInputScreen(),
+      ),
+      GoRoute(
+        path: '/goals',
+        builder: (context, state) => const GoalsScreen(),
+      ),
+      GoRoute(
+        path: '/achievements',
+        builder: (context, state) => const AchievementsScreen(),
       ),
     ],
   );

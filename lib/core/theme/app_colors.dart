@@ -54,6 +54,31 @@ class AppColors {
   /// 深色主题 - 次要文字
   static const Color darkTextSecondary = Color(0xFFB2BEC3);
 
+  // ============== 绿植主题颜色 ==============
+  /// 绿植主题 - 背景色
+  static const Color greenThemeBackground = Color(0xFFE8F5E9);
+
+  /// 绿植主题 - 卡片背景
+  static const Color greenThemeCardBackground = Color(0xFFE8F5E9);
+
+  /// 绿植主题 - 阴影亮部
+  static const Color greenThemeShadowLight = Color(0xFFFFFFFF);
+
+  /// 绿植主题 - 阴影暗部
+  static const Color greenThemeShadowDark = Color(0xFFB8D4BE);
+
+  /// 绿植主题 - 主色调（清新绿）
+  static const Color greenThemePrimary = Color(0xFF4CAF50);
+
+  /// 绿植主题 - 次要色
+  static const Color greenThemeSecondary = Color(0xFF81C784);
+
+  /// 绿植主题 - 文字颜色
+  static const Color greenThemeTextPrimary = Color(0xFF1B5E20);
+
+  /// 绿植主题 - 次要文字
+  static const Color greenThemeTextSecondary = Color(0xFF558B2F);
+
   // ============== 通用颜色 ==============
   /// 运动类型颜色
   static const Color runningColor = Color(0xFFFF6B6B);

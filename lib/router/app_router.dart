@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../presentation/screens/home/home_screen.dart';
 import '../presentation/screens/exercise/exercise_list_screen.dart';
@@ -9,6 +8,8 @@ import '../presentation/screens/statistics/statistics_screen.dart';
 import '../presentation/screens/body/body_metrics_screen.dart';
 import '../presentation/screens/body/body_input_screen.dart';
 import '../presentation/screens/settings/settings_screen.dart';
+import '../presentation/screens/settings/goals_screen.dart';
+import '../presentation/screens/settings/achievements_screen.dart';
 import '../core/constants/app_constants.dart';
 
 /// 应用路由配置
@@ -68,6 +69,16 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/settings',
       builder: (context, state) => const SettingsScreen(),
+    ),
+    // 运动目标与提醒
+    GoRoute(
+      path: '/goals',
+      builder: (context, state) => const GoalsScreen(),
+    ),
+    // 成就
+    GoRoute(
+      path: '/achievements',
+      builder: (context, state) => const AchievementsScreen(),
     ),
   ],
 );

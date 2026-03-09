@@ -1,3 +1,10 @@
+/// 主题模式枚举（包含绿植主题）
+enum AppThemeMode {
+  light,
+  dark,
+  green,  // 绿植主题
+}
+
 /// 运动类型枚举
 enum ExerciseType {
   running,   // 跑步
@@ -24,7 +31,8 @@ enum Gender {
 /// 时间筛选周期
 enum FilterPeriod {
   week,   // 7天
-  month   // 30天
+  month,  // 30天
+  quarter // 90天
 }
 
 /// 运动类型扩展方法
@@ -83,6 +91,8 @@ extension FilterPeriodExtension on FilterPeriod {
         return '7天';
       case FilterPeriod.month:
         return '30天';
+      case FilterPeriod.quarter:
+        return '90天';
     }
   }
 
@@ -92,6 +102,8 @@ extension FilterPeriodExtension on FilterPeriod {
         return 7;
       case FilterPeriod.month:
         return 30;
+      case FilterPeriod.quarter:
+        return 90;
     }
   }
 }

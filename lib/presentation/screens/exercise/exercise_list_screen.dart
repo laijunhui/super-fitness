@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/widgets/neumorphic_container.dart';
 import '../../../core/constants/app_constants.dart';
-import '../../../core/utils/date_utils.dart' as app_date_utils;
+import '../../../data/models/exercise_model.dart';
 import '../../providers/exercise_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/statistics_provider.dart';
+import '../../widgets/exercise_map_card.dart';
 
 /// 运动记录列表页
 class ExerciseListScreen extends StatefulWidget {
@@ -18,6 +18,10 @@ class ExerciseListScreen extends StatefulWidget {
 }
 
 class _ExerciseListScreenState extends State<ExerciseListScreen> {
+  // 默认筛选条件：最近7天 + 跑步
+  FilterPeriod _selectedPeriod = FilterPeriod.week;
+  ExerciseType? _selectedExerciseType = ExerciseType.running;
+
   @override
   void initState() {
     super.initState();
@@ -27,11 +31,32 @@ class _ExerciseListScreenState extends State<ExerciseListScreen> {
     });
   }
 
+  /// 根据筛选条件过滤运动记录
+  List<ExerciseModel> _filterExercises(List<ExerciseModel> exercises) {
+    final now = DateTime.now();
+    final startDate = now.subtract(Duration(days: _selectedPeriod.days));
+
+    return exercises.where((exercise) {
+      // 时间筛选
+      if (exercise.createdAt.isBefore(startDate)) {
+        return false;
+      }
+      // 运动类型筛选
+      if (_selectedExerciseType != null && exercise.type != _selectedExerciseType) {
+        return false;
+      }
+      return true;
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeProvider = context.watch<ThemeProvider>();
     final exerciseProvider = context.watch<ExerciseProvider>();
     final isDark = themeProvider.isDarkMode;
+
+    // 应用筛选条件
+    final filteredExercises = _filterExercises(exerciseProvider.exercises);
 
     return Scaffold(
       appBar: AppBar(
@@ -43,14 +68,92 @@ class _ExerciseListScreenState extends State<ExerciseListScreen> {
           ),
         ],
       ),
-      body: exerciseProvider.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : exerciseProvider.exercises.isEmpty
-              ? _buildEmptyState(isDark)
-              : _buildExerciseList(exerciseProvider, isDark),
+      body: Column(
+        children: [
+          _buildFilterBar(isDark),
+          Expanded(
+            child: exerciseProvider.isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : filteredExercises.isEmpty
+                    ? _buildEmptyState(isDark)
+                    : _buildExerciseList(filteredExercises, isDark),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.push('/exercise/add'),
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  /// 构建筛选栏
+  Widget _buildFilterBar(bool isDark) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkCardBackground : AppColors.lightCardBackground,
+      ),
+      child: Row(
+        children: [
+          // 时间筛选
+          Expanded(
+            child: DropdownButtonFormField<FilterPeriod>(
+              value: _selectedPeriod,
+              decoration: InputDecoration(
+                labelText: '时间',
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              items: FilterPeriod.values.map((period) {
+                return DropdownMenuItem(
+                  value: period,
+                  child: Text(period.displayName),
+                );
+              }).toList(),
+              onChanged: (value) {
+                if (value != null) {
+                  setState(() {
+                    _selectedPeriod = value;
+                  });
+                }
+              },
+            ),
+          ),
+          const SizedBox(width: 12),
+          // 运动类型筛选
+          Expanded(
+            child: DropdownButtonFormField<ExerciseType?>(
+              value: _selectedExerciseType,
+              decoration: InputDecoration(
+                labelText: '类型',
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              items: [
+                const DropdownMenuItem(
+                  value: null,
+                  child: Text('全部'),
+                ),
+                ...ExerciseType.values.map((type) {
+                  return DropdownMenuItem(
+                    value: type,
+                    child: Text('${type.icon} ${type.displayName}'),
+                  );
+                }),
+              ],
+              onChanged: (value) {
+                setState(() {
+                  _selectedExerciseType = value;
+                });
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -86,102 +189,21 @@ class _ExerciseListScreenState extends State<ExerciseListScreen> {
     );
   }
 
-  Widget _buildExerciseList(ExerciseProvider provider, bool isDark) {
+  Widget _buildExerciseList(List<ExerciseModel> exercises, bool isDark) {
     return RefreshIndicator(
-      onRefresh: () => provider.loadExercises(),
+      onRefresh: () => context.read<ExerciseProvider>().loadExercises(),
       child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: provider.exercises.length,
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        itemCount: exercises.length,
         itemBuilder: (context, index) {
-          final exercise = provider.exercises[index];
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: GestureDetector(
-              onTap: () => context.push('/exercise/${exercise.id}'),
-              child: NeumorphicContainer(
-                isDark: isDark,
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 50,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        color: _getExerciseColor(exercise.type).withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Center(
-                        child: Text(
-                          exercise.type.icon,
-                          style: const TextStyle(fontSize: 24),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            exercise.type.displayName,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            app_date_utils.DateUtils.getRelativeTime(exercise.createdAt),
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          '${exercise.duration}分钟',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${exercise.calories.toStringAsFixed(0)} kcal',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
+          final exercise = exercises[index];
+          return ExerciseMapCard(
+            exercise: exercise,
+            isDark: isDark,
+            onTap: () => context.push('/exercise/${exercise.id}'),
           );
         },
       ),
     );
-  }
-
-  Color _getExerciseColor(ExerciseType type) {
-    switch (type) {
-      case ExerciseType.running:
-        return AppColors.runningColor;
-      case ExerciseType.cycling:
-        return AppColors.cyclingColor;
-      case ExerciseType.walking:
-        return AppColors.walkingColor;
-      case ExerciseType.gym:
-        return AppColors.gymColor;
-    }
   }
 }

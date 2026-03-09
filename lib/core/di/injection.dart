@@ -9,6 +9,10 @@ import '../../presentation/providers/exercise_provider.dart';
 import '../../presentation/providers/statistics_provider.dart';
 import '../../presentation/providers/body_metrics_provider.dart';
 import '../../presentation/providers/theme_provider.dart';
+import '../../presentation/providers/map_provider.dart';
+import '../../presentation/providers/trend_provider.dart';
+import '../../presentation/providers/goal_provider.dart';
+import '../../presentation/providers/achievement_provider.dart';
 
 /// 获取所有Provider配置
 List<SingleChildWidget> getProviders() {
@@ -48,6 +52,28 @@ List<SingleChildWidget> getProviders() {
       create: (context) => BodyMetricsProvider(
         bodyMetricsRepository: context.read<BodyMetricsRepository>(),
       ),
+    ),
+    ChangeNotifierProvider<MapProvider>(
+      create: (_) => MapProvider(),
+    ),
+    ChangeNotifierProvider<TrendProvider>(
+      create: (context) => TrendProvider(
+        exerciseRepository: context.read<ExerciseRepository>(),
+      ),
+    ),
+    ChangeNotifierProxyProvider<ExerciseRepository, GoalProvider>(
+      create: (context) => GoalProvider(
+        exerciseRepository: context.read<ExerciseRepository>(),
+      ),
+      update: (context, repository, previous) =>
+          previous ?? GoalProvider(exerciseRepository: repository),
+    ),
+    ChangeNotifierProxyProvider<ExerciseRepository, AchievementProvider>(
+      create: (context) => AchievementProvider(
+        exerciseRepository: context.read<ExerciseRepository>(),
+      ),
+      update: (context, repository, previous) =>
+          previous ?? AchievementProvider(exerciseRepository: repository),
     ),
   ];
 }
